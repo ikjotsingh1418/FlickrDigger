@@ -2,8 +2,8 @@
 //  PhotoDetailViewModel.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 9/2/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 9/2/19.
+//   .
 //
 
 import Foundation
@@ -11,12 +11,14 @@ import UIKit
 
 class PhotoDetailViewModel {
  
+    // MARK:- weekely called variables on view
     var showAlertMessage : (()->())?
     var updateLoadingStatus : (()->())?
     var reloadImage :  (()->())?
     var getImageView : (() -> UIImageView?)?
     var getImageViewFrameInTransitioningView : (() -> CGRect?)?
     
+    // MARK:- Variables
     var transitionController = ExpandTransitionController()
     
     var photo : PhotoCollectionCellViewModel? {
@@ -58,6 +60,8 @@ class PhotoDetailViewModel {
     
 }
 
+
+// MARK:- Animation Delegate Methods
 extension PhotoDetailViewModel : ExpandAnimatorDelegate {
     func referenceImageViewForAnimation(for zoomAnimator: ExpandAnimator) -> UIImageView? {
         return self.getImageView?()

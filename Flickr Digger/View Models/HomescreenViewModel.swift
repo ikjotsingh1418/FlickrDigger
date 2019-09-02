@@ -2,18 +2,34 @@
 //  PhotoCollectionCellViewModel.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 8/31/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 8/31/19.
+//   .
 //
 
 import Foundation
 import UIKit
+
+class PhotoCollectionCellViewModel {
+    var thumbnailImage : UIImage?
+    let thumbnailImageUrl : String
+    let originalImageUrl : String
+    let name : String
+    
+    // Dependency Injection
+    init(photoModel : PhotoModel) {
+        let urlString = String(format: "https://farm%d.staticflickr.com/%@/%@_%@", photoModel.farm,photoModel.serverId,photoModel.photoId,photoModel.secretId)
+        thumbnailImageUrl = urlString + "_t.jpg"
+        originalImageUrl = urlString + ".jpg"
+        name = photoModel.title
+    }
+}
 
 class HomescreenViewModel {
     
     
     let service : APIServiceProtocol
     
+    //MARK:- Weakely called property on view
     var reloadCollectionViewClosure : (()->())?
     var updateLoadingStatus : (()->())?
     var showAlertMessage : (()->())?
@@ -24,8 +40,8 @@ class HomescreenViewModel {
     var getImageView : (() -> UIImageView?)?
     var getImageViewFrameInTransitioningView : (() -> CGRect?)?
     
+    //MARK:- Variables
     var fetchedDetailModel : Photos?
-    
     var latestPage : Double = 1
     var currentSearchTerm : String?
     var selectedIndexPath : IndexPath?
@@ -35,8 +51,7 @@ class HomescreenViewModel {
             self.reloadCollectionViewClosure?()
         }
     }
-    
-    
+  
     var itemsInRow : Int {
         get {
             if let val = UserDefaults.standard.value(forKey: "itemsInRow") as? Int{
@@ -87,6 +102,7 @@ class HomescreenViewModel {
         }
     }
     
+    //MARK:- Methods
     init(apiService : APIServiceProtocol = APIService() ) {
         self.service = apiService
         
@@ -115,7 +131,6 @@ class HomescreenViewModel {
     
     func pushDetailViewControllerForIndex(index:IndexPath){
         selectedIndexPath = index
-//        let detailVC = PhotoDetailViewController.init(nibName: "PhotoDetailViewController", bundle: nil)
         let detailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "photoDetail") as! PhotoDetailViewController
         if  cellViewModels.count > index.row {
             detailVC.photoModel = cellViewModels[index.row]
@@ -174,6 +189,7 @@ class HomescreenViewModel {
     
 }
 
+// MARK:- Animator Delegate Methods
 extension HomescreenViewModel : ExpandAnimatorDelegate {
     func transitionWillBeginWith(ExpandAnimator: ExpandAnimator) {
         
@@ -195,26 +211,4 @@ extension HomescreenViewModel : ExpandAnimatorDelegate {
 }
 
 
-
-
-class PhotoCollectionCellViewModel {
-    var thumbnailImage : UIImage?
-    let thumbnailImageUrl : String
-    let originalImageUrl : String
-    let name : String
-    
-    // Dependency Injection
-    init(photoModel : PhotoModel) {
-      
-        let urlString = String(format: "https://farm%d.staticflickr.com/%@/%@_%@", photoModel.farm,photoModel.serverId,photoModel.photoId,photoModel.secretId)
-        
-        thumbnailImageUrl = urlString + "_t.jpg"
-        originalImageUrl = urlString + ".jpg"
-        name = photoModel.title
-//        thumbnailImage =   #imageLiteral(resourceName: "thumbnail")
-        
-    }
-    
-    
-}
 

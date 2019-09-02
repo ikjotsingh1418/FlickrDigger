@@ -2,33 +2,27 @@
 //  ViewController.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 9/2/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 9/2/19.
+//   .
 //
 
 import UIKit
 
-//protocol PhotoDetailViewControllerDelegate : NSObject {
-//    func getPhotoModel() -> PhotoCollectionCellViewModel
-//}
-
 class PhotoDetailViewController: UIViewController {
 
-    
+    // outlets
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var imageView: UIImageView!
-    
-   // weak var delegate : PhotoDetailViewControllerDelegate?
-    
-    
+
+    // photo model is passed by the intializing class
     var photoModel : PhotoCollectionCellViewModel?
     
+    // view model is lazily instantiated
     lazy var viewModel: PhotoDetailViewModel = {
         return PhotoDetailViewModel()
     }()
     
-    
-    
+    // MARK:- Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         self.activityIndicator.stopAnimating()
@@ -46,6 +40,13 @@ class PhotoDetailViewController: UIViewController {
         self.navigationController?.hidesBarsOnTap = false
     }
     
+    func showAlert( _ message: String ) {
+        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
+        alert.addAction( UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    // MARK:- View Model Setup
     func setupViewModel() {
         viewModel.reloadImage = { [weak self]() in
             DispatchQueue.main.async {
@@ -90,11 +91,7 @@ class PhotoDetailViewController: UIViewController {
         
     }
 
-    func showAlert( _ message: String ) {
-        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
-        alert.addAction( UIAlertAction(title: "Ok", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
+    
     
     
 }

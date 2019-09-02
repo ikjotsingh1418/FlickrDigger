@@ -2,17 +2,16 @@
 //  Constants.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 8/31/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 8/31/19.
+//   .
 //
 
 import Foundation
 import UIKit
 struct constants {
-    
-    
-    
+
     struct APIDetails {
+        // URL components
         static let APIScheme = "https"
         static let APIHost = "api.flickr.com"
         static let APIPath = "/services/rest"

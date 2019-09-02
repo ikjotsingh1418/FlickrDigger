@@ -2,23 +2,25 @@
 //  ViewController.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 8/31/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 8/31/19.
+//   .
 //
 
 import UIKit
 
 class HomeViewController: UIViewController {
-    
+    // MARK:- Variables
+    // outlets
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
+    // view model is lazily instantiated
     lazy var viewModel: HomescreenViewModel = {
         return HomescreenViewModel()
     }()
     
     let searchController = UISearchController(searchResultsController: nil)
-    
+    // MARK:- Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -28,6 +30,13 @@ class HomeViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
+    func showAlert( _ message: String ) {
+        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
+        alert.addAction( UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    // MARK:- Collection View setup
     func setupCollectionView() {
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -42,19 +51,17 @@ class HomeViewController: UIViewController {
         
     }
     
+    // MARK:- Navigation Bar Setup
     func setupNavigationBar() {
+        
+        // search bar is enabled in navigation bar and right button is added with target.
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
         self.definesPresentationContext = true
-        
-        
-        // Place the search bar in the navigation item's title view.
-        
-        
-        // Don't hide the navigation bar because the search bar is in it.
         searchController.hidesNavigationBarDuringPresentation = false
         self.navigationItem.titleView = searchController.searchBar
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterButtonTapped(sender:)))
+        
         
         
     }
@@ -83,7 +90,7 @@ class HomeViewController: UIViewController {
         self.present(optionMenu, animated: true, completion: nil)
     }
     
-    
+    // MARK:- View Model Setup
     func setupViewModel() {
         viewModel.reloadCollectionViewClosure = { [weak self]() in
             DispatchQueue.main.async {
@@ -91,7 +98,6 @@ class HomeViewController: UIViewController {
             }
             
         }
-        
         viewModel.updateLoadingStatus = { [weak self]() in
             
             let isLoading = self?.viewModel.viewIsLoading ?? false
@@ -106,23 +112,16 @@ class HomeViewController: UIViewController {
                     self?.activityIndicator.stopAnimating()
                 }
             }
-            
-            
         }
-        
-       
         viewModel.showAlertMessage = { [weak self]() in
             if let message = self?.viewModel.alertMessage {
                 DispatchQueue.main.async {
                     self?.showAlert( message )
                     self?.activityIndicator.stopAnimating()
                 }
-                
             }
         }
-        
         viewModel.pushNewViewController = { [weak self]() in
-           
             DispatchQueue.main.async {
                 if let newVC = self?.viewModel.pushViewController {
                     self?.navigationController?.pushViewController(newVC, animated: true)
@@ -135,18 +134,13 @@ class HomeViewController: UIViewController {
                 self?.navigationController?.delegate = self?.viewModel.navigationDelegate
             }
         }
-        
         viewModel.getImageView  = { [weak self]()->UIImageView? in
-            
             if let index = self?.viewModel.selectedIndexPath, let cell = self?.collectionView.cellForItem(at: index ) as? PhotoCollectionViewCell {
             return cell.imageView
             }else {
                 return nil
             }
-            
-            
         }
-        
         viewModel.getImageViewFrameInTransitioningView = { [weak self]()->CGRect? in
             
             guard let index = self?.viewModel.selectedIndexPath else {
@@ -165,24 +159,20 @@ class HomeViewController: UIViewController {
             }
             
             return cellFrame
-            
         }
   
         viewModel.fetchPhotosForKeyword(keyword: "height")
-        
     }
     
     
-    func showAlert( _ message: String ) {
-        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
-        alert.addAction( UIAlertAction(title: "Ok", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
+   
     
     
     
 }
 
+
+// MARK:- Collection View Delegate and Datasource
 
 extension HomeViewController : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -225,35 +215,30 @@ extension HomeViewController : UICollectionViewDataSource {
 }
 
 extension HomeViewController : UICollectionViewDelegate {
+    
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-        if let cellModel = viewModel.getPhotoViewModelAtIndexPath(indexPath: indexPath){
-            guard let photoCell = cell as? PhotoCollectionViewCell else{
-                return
-            }
-            // set thumbnail image
-            photoCell.imageView.image = #imageLiteral(resourceName: "thumbnail")
-            ImageDownloadManager.shared.fetchImageForURL(urlString: cellModel.thumbnailImageUrl) { (image, url, error) in
+        guard let cellModel = viewModel.getPhotoViewModelAtIndexPath(indexPath: indexPath)else{
+            return
+        }
+        guard let photoCell = cell as? PhotoCollectionViewCell else{
+            return
+        }
+        photoCell.imageView.image = #imageLiteral(resourceName: "thumbnail")
+        ImageDownloadManager.shared.fetchImageForURL(urlString: cellModel.thumbnailImageUrl) { (image, url, error) in
+            DispatchQueue.main.async {
                 if url == cellModel.thumbnailImageUrl,error == nil {
-                    DispatchQueue.main.async {
-                        cellModel.thumbnailImage = image 
-                        photoCell.imageView.image = image  ?? #imageLiteral(resourceName: "error")
-                        photoCell.imageView.contentMode = .scaleAspectFill
-                    }
-                   
+                    cellModel.thumbnailImage = image
+                    photoCell.imageView.image = image  ?? #imageLiteral(resourceName: "error")
                 }else{
-                    DispatchQueue.main.async {
-                        cellModel.thumbnailImage =  #imageLiteral(resourceName: "error")
-                        photoCell.imageView.image =  #imageLiteral(resourceName: "error")
-                        photoCell.imageView.contentMode = .scaleAspectFill
-                    }
-
+                    cellModel.thumbnailImage =  #imageLiteral(resourceName: "error")
+                    photoCell.imageView.image =  #imageLiteral(resourceName: "error")
+                    
                 }
+                photoCell.imageView.contentMode = .scaleAspectFill
             }
-            
         }
     }
-    
+
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
@@ -282,6 +267,8 @@ extension HomeViewController : UICollectionViewDelegate {
 }
 
 
+// MARK:- Collection view flow layout delegate
+
 extension HomeViewController : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -300,45 +287,30 @@ extension HomeViewController : UICollectionViewDelegateFlowLayout {
     
 }
 
+// MARK:- Search Bar Delegates
 extension HomeViewController : UISearchBarDelegate  {
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar)
     {
-        //Show Cancel
         searchBar.setShowsCancelButton(true, animated: false)
-        //searchBar.tintColor = .white
     }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String)
-    {
-        //Filter function
-        //self.filterFunction(searchText: searchText)
-    }
-    
+
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar)
     {
-        //Hide Cancel
         searchBar.setShowsCancelButton(false, animated: false)
         searchBar.resignFirstResponder()
-        
         guard let term = searchBar.text , term.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
-            //viewModel.showAlertMessage
             self.showAlert("Please enter a search keyword")
             return
         }
         self.viewModel.fetchPhotosForKeyword(keyword:term)
-        //Filter function
-        //self.filterFunction(searchText: term)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar)
     {
-        //Hide Cancel
         searchBar.setShowsCancelButton(false, animated: false)
         searchBar.text = String()
         searchBar.resignFirstResponder()
-        
-        //Filter function
-        //self.filterFunction(searchText: searchBar.text)
+
     }
 }

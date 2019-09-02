@@ -2,8 +2,8 @@
 //  IDOperation.swift
 //  Flickr Digger
 //
-//  Created by Cubastion on 9/2/19.
-//  Copyright © 2019 Cubastion Consulting. All rights reserved.
+//  Created by Ikjot Singh on 9/2/19.
+//   .
 //
 
 import Foundation 
@@ -11,6 +11,7 @@ import UIKit
 
 class IDOperation: Operation {
     
+    // MARK:- Variables
     var downloadHandler : ImageDownloadClosure?
     var imageUrl: URL!
     var image : UIImage?
@@ -57,18 +58,10 @@ class IDOperation: Operation {
         _finished = finished
     }
     
+    // MARK:- Main
     required init (url: URL) {
         self.imageUrl = url
     }
-    
-    
-    
-    /*override func start() {
-     if self.isCancelled {
-     finish(true)
-     }
-     main()
-     }*/
     
     override func main() {
         guard isCancelled == false else {
@@ -80,7 +73,7 @@ class IDOperation: Operation {
         self.downloadImageFromUrl()
     }
     
-    
+    // MARK:- Set Priority Functions
     func setLowPriority (){
         downloadTask?.priority = 0
         queuePriority = .veryLow
