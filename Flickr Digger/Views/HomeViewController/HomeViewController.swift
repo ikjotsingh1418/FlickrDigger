@@ -223,15 +223,17 @@ extension HomeViewController : UICollectionViewDelegate {
         guard let photoCell = cell as? PhotoCollectionViewCell else{
             return
         }
-        photoCell.imageView.image = #imageLiteral(resourceName: "thumbnail")
+        photoCell.imageView.image = UIImage(named: "thumbnail")
+        
         ImageDownloadManager.shared.fetchImageForURL(urlString: cellModel.thumbnailImageUrl) { (image, url, error) in
             DispatchQueue.main.async {
+                let errorImg =  UIImage(named: "error")
                 if url == cellModel.thumbnailImageUrl,error == nil {
                     cellModel.thumbnailImage = image
-                    photoCell.imageView.image = image  ?? #imageLiteral(resourceName: "error")
+                    photoCell.imageView.image = image  ?? errorImg
                 }else{
-                    cellModel.thumbnailImage =  #imageLiteral(resourceName: "error")
-                    photoCell.imageView.image =  #imageLiteral(resourceName: "error")
+                    cellModel.thumbnailImage =  errorImg
+                    photoCell.imageView.image =  errorImg
                     
                 }
                 photoCell.imageView.contentMode = .scaleAspectFill
